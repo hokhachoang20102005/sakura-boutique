@@ -4,7 +4,7 @@ import io
 import qrcode
 import base64
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, jsonify
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
 from cau_hinh import CauHinh
@@ -491,6 +491,48 @@ def admin_panel():
         flash('Bạn không có quyền truy cập.', 'danger')
         return redirect(url_for('trang_chu'))
     return render_template('admin_panel.html')
+
+
+@app.route('/webhook/sepay', methods=['POST'])
+def webhook_sepay():
+    api_key = app.config.get('SEPAY_API_KEY', '')
+    if api_key:
+        auth = request.headers.get('Authorization', '')
+        if auth != f'Apikey {api_key}':
+            return jsonify(success=False), 403
+
+    data = request.get_json(silent=True)
+    if not data or data.get('transferType') != 'in':
+        return jsonify(success=True), 200
+
+    noi_dung = (data.get('content') or '').upper()
+    so_tien = int(data.get('transferAmount', 0))
+
+    yc = YeuCauNap.query.filter_by(trang_thai='cho_duyet').filter(
+        db.func.upper(YeuCauNap.ma_giao_dich) == noi_dung
+    ).first()
+    if not yc:
+        for y in YeuCauNap.query.filter_by(trang_thai='cho_duyet').all():
+            if y.ma_giao_dich.upper() in noi_dung:
+                yc = y
+                break
+    if not yc:
+        return jsonify(success=True), 200
+
+    if so_tien < yc.so_tien:
+        return jsonify(success=True), 200
+
+    yc.trang_thai = 'da_duyet'
+    yc.ghi_chu_admin = f'SePay tự động — ref: {data.get("referenceCode", "")}'
+    yc.updated_at = datetime.now()
+
+    vi = Vi.query.filter_by(nguoi_dung_id=yc.nguoi_dung_id).first()
+    vi.so_du += yc.so_tien
+    gd = GiaoDichVi(vi_id=vi.id, loai='nap_tien', so_tien=yc.so_tien,
+                    so_du_sau=vi.so_du, mo_ta=f'Nạp tiền — Mã GD: {yc.ma_giao_dich}')
+    db.session.add(gd)
+    db.session.commit()
+    return jsonify(success=True), 200
 
 
 @app.route('/admin/duyet-nap')

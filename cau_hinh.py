@@ -18,3 +18,5 @@ class CauHinh:
     NGAN_HANG = 'TPB'
     SO_TAI_KHOAN = '88820102005'
     TEN_TAI_KHOAN = 'HO KHAC HOANG'
+
+    SEPAY_API_KEY = os.environ.get('SEPAY_API_KEY', '')
