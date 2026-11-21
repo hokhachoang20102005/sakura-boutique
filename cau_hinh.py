@@ -6,7 +6,9 @@ thu_muc_goc = os.path.abspath(os.path.dirname(__file__))
 _db_url_mac_dinh = 'mssql+pyodbc://@localhost/SakuraBoutique?driver=ODBC+Driver+18+for+SQL+Server&trusted_connection=yes&TrustServerCertificate=yes'
 _db_url = os.environ.get('DATABASE_URL', _db_url_mac_dinh)
 if _db_url.startswith('postgres://'):
-    _db_url = _db_url.replace('postgres://', 'postgresql://', 1)
+    _db_url = _db_url.replace('postgres://', 'postgresql+psycopg2://', 1)
+elif _db_url.startswith('postgresql://'):
+    _db_url = _db_url.replace('postgresql://', 'postgresql+psycopg2://', 1)
 
 class CauHinh:
     SECRET_KEY = os.environ.get('SECRET_KEY', 'sakura-boutique-secret-key-2024')
