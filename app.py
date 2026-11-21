@@ -644,5 +644,51 @@ with app.app_context():
         db.session.add(vi_admin)
         db.session.commit()
 
+    if SanPham.query.count() == 0:
+        admin = NguoiDung.query.filter_by(la_admin=True).first()
+        DS_SP = [
+            ("Set Khánh Niên – BST Lễ Hội", 785000, 1570000, "dam", "Lụa tổng hợp", "sp_mau_00.jpg"),
+            ("Áo dài Bảo Diên – BST Lễ Hội", 1275000, None, "ao", "Lụa", "sp_mau_01.jpg"),
+            ("Áo Nhật Chiêu – BST Lễ Hội", 1250000, None, "ao", "Vải thô", "sp_mau_02.jpg"),
+            ("Áo Hồng Tiêu – BST Lễ Hội", 685000, None, "ao", "Cotton", "sp_mau_03.jpg"),
+            ("Khăn Lạc Phong – BST Lễ Hội", 375000, None, "phu_kien", "Lụa", "sp_mau_04.jpg"),
+            ("Khăn Cát Cát – BST Lễ Hội", 575000, None, "phu_kien", "Lụa tơ tằm", "sp_mau_05.jpg"),
+            ("Đầm Tiêu Y – Thạch – BST Lễ Hội", 465000, None, "dam", "Vải lanh", "sp_mau_06.jpg"),
+            ("Quần Hoa Phong – Mẫu Đơn – BST Lễ Hội", 675000, None, "vay", "Cotton pha", "sp_mau_07.jpg"),
+            ("Khăn Hạ Y – BST Lễ Hội", 245000, None, "phu_kien", "Vải thô", "sp_mau_08.jpg"),
+            ("Áo dài Lưu Thảo", 975000, None, "ao", "Lụa", "sp_mau_09.jpg"),
+            ("Áo khoác Kiển Sam", 1650000, None, "ao", "Dạ", "sp_mau_10.jpg"),
+            ("Áo dài Kim Châu", 985000, 1085000, "ao", "Lụa gấm", "sp_mau_11.jpg"),
+            ("Quần Hoa Phong – Kim Sa", 745000, None, "vay", "Cotton pha", "sp_mau_12.jpg"),
+            ("Áo dài Bảo Diên", 1275000, None, "ao", "Lụa", "sp_mau_13.jpg"),
+            ("Đầm Tiêu Y – Kết", 575000, None, "dam", "Vải lanh", "sp_mau_14.jpg"),
+            ("Đầm Tiêu Y – Lý", 525000, None, "dam", "Vải lanh", "sp_mau_15.jpg"),
+            ("Đầm Tiêu Y – Ngân", 525000, None, "dam", "Vải lanh", "sp_mau_16.jpg"),
+            ("Khăn Lạc Phong", 375000, None, "phu_kien", "Lụa", "sp_mau_17.jpg"),
+            ("Khăn Bông Bay", 215000, None, "phu_kien", "Cotton", "sp_mau_18.jpg"),
+            ("Đầm Tiêu Y – Thạch", 465000, None, "dam", "Vải lanh", "sp_mau_19.jpg"),
+            ("Áo khoác Tú Sam", 1275000, None, "ao", "Dạ pha", "sp_mau_20.jpg"),
+            ("Quần Hạ Vân – Du", 875000, None, "vay", "Lụa pha", "sp_mau_21.jpg"),
+            ("Áo khoác Đằng Sam", 985000, None, "ao", "Dạ", "sp_mau_22.jpg"),
+            ("Ichiyu Dress", 725000, 975000, "dam", "Vải thô", "sp_mau_23.jpg"),
+            ("Ichika Mesh Camisole", 275000, None, "ao", "Mesh", "sp_mau_24.jpg"),
+            ("Ichika Mesh Top", 375000, None, "ao", "Mesh", "sp_mau_25.jpg"),
+            ("Sonoko Blouse", 725000, None, "ao", "Lụa pha", "sp_mau_26.jpg"),
+            ("Amiru Skirt", 575000, None, "vay", "Vải thô", "sp_mau_27.jpg"),
+            ("Áo Dài Mạn Hoa", 1250000, None, "ao", "Lụa", "sp_mau_28.jpg"),
+            ("Quần Tiêu Nhi", 198000, 395000, "vay", "Cotton", "sp_mau_29.jpg"),
+            ("Quần Hoa Phong – Cúc", 500000, 625000, "vay", "Cotton pha", "sp_mau_30.jpg"),
+            ("Áo khoác Kim Lĩnh", 920000, 1150000, "ao", "Dạ", "sp_mau_31.jpg"),
+            ("Miki Striped Short", 98000, 245000, "vay", "Cotton", "sp_mau_32.jpg"),
+            ("Áo Dài Minh Du", 1295000, None, "ao", "Lụa gấm", "sp_mau_33.jpg"),
+            ("Đầm Tiêu Y", 465000, None, "dam", "Vải lanh", "sp_mau_34.jpg"),
+        ]
+        for ten, gia, gia_goc, dm, cl, anh in DS_SP:
+            db.session.add(SanPham(
+                nguoi_ban_id=admin.id, ten=ten, gia=gia, gia_goc=gia_goc,
+                danh_muc=dm, chat_lieu=cl, anh=anh, kich_co='S,M,L,XL',
+                mau_sac='', mo_ta='', so_luong=25, dang_ban=True))
+        db.session.commit()
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
