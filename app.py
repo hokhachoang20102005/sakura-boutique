@@ -8,7 +8,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, sen
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
 from cau_hinh import CauHinh
-from mo_hinh import db, NguoiDung, Vi, GiaoDichVi, YeuCauNap, SanPham, DonHang, ChuyenTien
+from mo_hinh import db, NguoiDung, Vi, GiaoDichVi, YeuCauNap, YeuCauRut, SanPham, DonHang, ChuyenTien
 
 app = Flask(__name__)
 app.config.from_object(CauHinh)
@@ -320,48 +320,32 @@ def tao_vietqr(so_tien, noi_dung):
     return url_qr
 
 
-@app.route('/chuyen-tien', methods=['GET', 'POST'])
+@app.route('/rut-tien', methods=['GET', 'POST'])
 @login_required
-def chuyen_tien():
+def rut_tien():
     if request.method == 'POST':
-        ten_nguoi_nhan = request.form['nguoi_nhan'].strip()
         so_tien = int(request.form['so_tien'])
-        ghi_chu = request.form.get('ghi_chu', '').strip()
+        ngan_hang = request.form['ngan_hang'].strip()
+        so_tai_khoan = request.form['so_tai_khoan'].strip()
+        ten_tai_khoan = request.form['ten_tai_khoan'].strip()
 
-        if so_tien <= 0:
-            flash('Số tiền phải lớn hơn 0.', 'danger')
-            return redirect(url_for('chuyen_tien'))
-
-        nguoi_nhan = NguoiDung.query.filter_by(ten_dang_nhap=ten_nguoi_nhan).first()
-        if not nguoi_nhan:
-            flash('Không tìm thấy người nhận.', 'danger')
-            return redirect(url_for('chuyen_tien'))
-        if nguoi_nhan.id == current_user.id:
-            flash('Không thể chuyển tiền cho chính mình.', 'danger')
-            return redirect(url_for('chuyen_tien'))
-
-        vi_gui = current_user.vi
-        vi_nhan = nguoi_nhan.vi
-
-        if vi_gui.so_du < so_tien:
+        if so_tien < 10000:
+            flash('Số tiền rút tối thiểu là 10.000đ.', 'danger')
+            return redirect(url_for('rut_tien'))
+        if current_user.vi.so_du < so_tien:
             flash('Số dư không đủ.', 'danger')
-            return redirect(url_for('chuyen_tien'))
+            return redirect(url_for('rut_tien'))
 
-        vi_gui.so_du -= so_tien
-        vi_nhan.so_du += so_tien
-
-        gd_gui = GiaoDichVi(vi_id=vi_gui.id, loai='chuyen_tien', so_tien=-so_tien,
-                            so_du_sau=vi_gui.so_du, mo_ta=f'Chuyển tiền cho {nguoi_nhan.ho_ten}')
-        gd_nhan = GiaoDichVi(vi_id=vi_nhan.id, loai='nhan_tien', so_tien=so_tien,
-                             so_du_sau=vi_nhan.so_du, mo_ta=f'Nhận tiền từ {current_user.ho_ten}')
-        ct = ChuyenTien(vi_gui_id=vi_gui.id, vi_nhan_id=vi_nhan.id, so_tien=so_tien, ghi_chu=ghi_chu)
-
-        db.session.add_all([gd_gui, gd_nhan, ct])
+        yc = YeuCauRut(nguoi_dung_id=current_user.id, so_tien=so_tien,
+                       ngan_hang=ngan_hang, so_tai_khoan=so_tai_khoan, ten_tai_khoan=ten_tai_khoan)
+        db.session.add(yc)
         db.session.commit()
 
-        flash(f'Đã chuyển {dinh_dang_tien(so_tien)}đ cho {nguoi_nhan.ho_ten}.', 'success')
+        flash(f'Đã gửi yêu cầu rút {dinh_dang_tien(so_tien)}đ. Vui lòng chờ admin duyệt.', 'success')
         return redirect(url_for('vi_tien'))
-    return render_template('chuyen_tien.html')
+
+    ds_yeu_cau = YeuCauRut.query.filter_by(nguoi_dung_id=current_user.id).order_by(YeuCauRut.created_at.desc()).limit(20).all()
+    return render_template('rut_tien.html', ds_yeu_cau=ds_yeu_cau)
 
 
 # ============================================================
@@ -581,6 +565,57 @@ def xu_ly_nap(yc_id, hanh_dong):
     return redirect(url_for('admin_duyet_nap'))
 
 
+@app.route('/admin/duyet-rut')
+@login_required
+def admin_duyet_rut():
+    if not current_user.la_admin:
+        flash('Bạn không có quyền truy cập.', 'danger')
+        return redirect(url_for('trang_chu'))
+    ds = YeuCauRut.query.order_by(YeuCauRut.created_at.desc()).all()
+    return render_template('admin_duyet_rut.html', ds_yeu_cau=ds)
+
+
+@app.route('/admin/duyet-rut/<int:yc_id>/<hanh_dong>', methods=['POST'])
+@login_required
+def xu_ly_rut(yc_id, hanh_dong):
+    if not current_user.la_admin:
+        flash('Bạn không có quyền.', 'danger')
+        return redirect(url_for('trang_chu'))
+
+    yc = YeuCauRut.query.get_or_404(yc_id)
+    if yc.trang_thai != 'cho_duyet':
+        flash('Yêu cầu này đã được xử lý.', 'info')
+        return redirect(url_for('admin_duyet_rut'))
+
+    ghi_chu = request.form.get('ghi_chu', '').strip()
+
+    if hanh_dong == 'duyet':
+        vi = Vi.query.filter_by(nguoi_dung_id=yc.nguoi_dung_id).first()
+        if vi.so_du < yc.so_tien:
+            flash(f'Số dư ví không đủ ({dinh_dang_tien(vi.so_du)}đ < {dinh_dang_tien(yc.so_tien)}đ).', 'danger')
+            return redirect(url_for('admin_duyet_rut'))
+
+        yc.trang_thai = 'da_duyet'
+        yc.ghi_chu_admin = ghi_chu
+        yc.updated_at = datetime.now()
+
+        vi.so_du -= yc.so_tien
+        gd = GiaoDichVi(vi_id=vi.id, loai='rut_tien', so_tien=-yc.so_tien,
+                        so_du_sau=vi.so_du,
+                        mo_ta=f'Rút tiền về {yc.ngan_hang} — STK: {yc.so_tai_khoan}')
+        db.session.add(gd)
+        flash(f'Đã duyệt rút {dinh_dang_tien(yc.so_tien)}đ cho {yc.nguoi_dung.ho_ten}.', 'success')
+
+    elif hanh_dong == 'tu-choi':
+        yc.trang_thai = 'tu_choi'
+        yc.ghi_chu_admin = ghi_chu
+        yc.updated_at = datetime.now()
+        flash('Đã từ chối yêu cầu rút tiền.', 'info')
+
+    db.session.commit()
+    return redirect(url_for('admin_duyet_rut'))
+
+
 # ============================================================
 # ADMIN — XEM CSDL
 # ============================================================
@@ -600,6 +635,7 @@ def admin_csdl():
         'yeu_cau_nap': {'model': YeuCauNap, 'ten': 'Yêu cầu nạp'},
         'san_pham': {'model': SanPham, 'ten': 'Sản phẩm'},
         'don_hang': {'model': DonHang, 'ten': 'Đơn hàng'},
+        'yeu_cau_rut': {'model': YeuCauRut, 'ten': 'Yêu cầu rút'},
         'chuyen_tien': {'model': ChuyenTien, 'ten': 'Chuyển tiền'},
     }
 

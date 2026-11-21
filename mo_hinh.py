@@ -105,6 +105,23 @@ class DonHang(db.Model):
     san_pham = db.relationship('SanPham', backref='don_hang')
 
 
+class YeuCauRut(db.Model):
+    __tablename__ = 'yeu_cau_rut'
+
+    id = db.Column(db.Integer, primary_key=True)
+    nguoi_dung_id = db.Column(db.Integer, db.ForeignKey('nguoi_dung.id'), nullable=False)
+    so_tien = db.Column(db.Integer, nullable=False)
+    ngan_hang = db.Column(db.Unicode(100), nullable=False)
+    so_tai_khoan = db.Column(db.Unicode(50), nullable=False)
+    ten_tai_khoan = db.Column(db.Unicode(100), nullable=False)
+    trang_thai = db.Column(db.Unicode(20), default='cho_duyet')
+    ghi_chu_admin = db.Column(db.Unicode(200))
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+
+    nguoi_dung = db.relationship('NguoiDung', backref='ds_yeu_cau_rut')
+
+
 class ChuyenTien(db.Model):
     __tablename__ = 'chuyen_tien'
 

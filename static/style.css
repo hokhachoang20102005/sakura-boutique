@@ -725,6 +725,7 @@ img { max-width: 100%; display: block; }
 .form-page h2 i { margin-right: 8px; }
 
 .form-group { margin-bottom: 18px; }
+.form-hint { display: block; margin-top: 4px; font-size: 0.82rem; color: #999; }
 
 .form-group label {
     display: block;

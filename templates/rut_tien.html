@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}Rút tiền — Sakura Boutique{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <h2><i class="fas fa-university"></i> Rút tiền về ngân hàng</h2>
+    <div class="balance-inline">
+        <span>Số dư hiện tại:</span>
+        <strong>{{ dinh_dang_tien(current_user.vi.so_du) }} VNĐ</strong>
+    </div>
+    <form method="POST">
+        <div class="form-group">
+            <label><i class="fas fa-building-columns"></i> Ngân hàng</label>
+            <select name="ngan_hang" required>
+                <option value="">— Chọn ngân hàng —</option>
+                <option value="Vietcombank">Vietcombank (VCB)</option>
+                <option value="Techcombank">Techcombank (TCB)</option>
+                <option value="TPBank">TPBank (TPB)</option>
+                <option value="MB Bank">MB Bank (MBB)</option>
+                <option value="ACB">ACB</option>
+                <option value="BIDV">BIDV</option>
+                <option value="Agribank">Agribank</option>
+                <option value="VietinBank">VietinBank (CTG)</option>
+                <option value="Sacombank">Sacombank (STB)</option>
+                <option value="VPBank">VPBank</option>
+                <option value="SHB">SHB</option>
+                <option value="Momo">Ví Momo</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label><i class="fas fa-credit-card"></i> Số tài khoản</label>
+            <input type="text" name="so_tai_khoan" required placeholder="Nhập số tài khoản ngân hàng">
+        </div>
+        <div class="form-group">
+            <label><i class="fas fa-user"></i> Tên chủ tài khoản</label>
+            <input type="text" name="ten_tai_khoan" required placeholder="VD: NGUYEN VAN A" style="text-transform: uppercase;">
+        </div>
+        <div class="form-group">
+            <label><i class="fas fa-money-bill-wave"></i> Số tiền rút (VNĐ)</label>
+            <input type="number" name="so_tien" required min="10000" max="{{ current_user.vi.so_du }}" step="1000" placeholder="Tối thiểu 10.000đ">
+            <small class="form-hint">Tối đa: {{ dinh_dang_tien(current_user.vi.so_du) }}đ</small>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-paper-plane"></i> Gửi yêu cầu rút tiền</button>
+    </form>
+
+    {% if ds_yeu_cau %}
+    <h3 style="margin-top: 2rem;"><i class="fas fa-history"></i> Lịch sử yêu cầu rút</h3>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Ngân hàng</th>
+                <th>STK</th>
+                <th>Số tiền</th>
+                <th>Trạng thái</th>
+                <th>Thời gian</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for yc in ds_yeu_cau %}
+            <tr>
+                <td>{{ yc.ngan_hang }}</td>
+                <td>{{ yc.so_tai_khoan }}</td>
+                <td>{{ dinh_dang_tien(yc.so_tien) }}đ</td>
+                <td>
+                    {% if yc.trang_thai == 'cho_duyet' %}
+                        <span class="badge badge-warning"><i class="fas fa-hourglass-half"></i> Chờ duyệt</span>
+                    {% elif yc.trang_thai == 'da_duyet' %}
+                        <span class="badge badge-success"><i class="fas fa-check"></i> Đã chuyển</span>
+                    {% else %}
+                        <span class="badge badge-danger"><i class="fas fa-times"></i> Từ chối</span>
+                    {% endif %}
+                </td>
+                <td>{{ yc.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>
+{% endblock %}
