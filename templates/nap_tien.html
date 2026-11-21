@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Nạp tiền — Sakura Boutique{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <h2><i class="fas fa-plus-circle"></i> Nạp tiền vào ví</h2>
+
+    {% if not da_tao %}
+    <form method="POST">
+        <div class="form-group">
+            <label>Số tiền muốn nạp (VNĐ)</label>
+            <input type="number" name="so_tien" required min="10000" step="1000" placeholder="VD: 500.000">
+        </div>
+        <p class="hint">Số tiền nạp tối thiểu: 10.000đ</p>
+        <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-qrcode"></i> Tạo mã QR</button>
+    </form>
+    {% else %}
+    <div class="qr-result">
+        <div class="qr-info">
+            <p><strong>Mã giao dịch:</strong> <span class="code-highlight">{{ ma_gd }}</span></p>
+            <p><strong>Số tiền:</strong> {{ dinh_dang_tien(so_tien) }} VNĐ</p>
+            <p><strong>Nội dung chuyển khoản:</strong> <span class="code-highlight">{{ ma_gd }}</span></p>
+        </div>
+        <div class="qr-image">
+            <img src="{{ qr_data }}" alt="Mã QR nạp tiền">
+        </div>
+        <div class="qr-instructions">
+            <h3><i class="fas fa-info-circle"></i> Hướng dẫn</h3>
+            <ol>
+                <li>Mở ứng dụng ngân hàng của bạn</li>
+                <li>Chọn <strong>"Quét mã QR"</strong> hoặc <strong>"Chuyển khoản"</strong></li>
+                <li>Quét mã QR ở trên</li>
+                <li>Kiểm tra thông tin và xác nhận chuyển khoản</li>
+                <li>Đợi admin duyệt (thường trong 5-30 phút)</li>
+            </ol>
+        </div>
+        <a href="{{ url_for('vi_tien') }}" class="btn btn-primary"><i class="fas fa-arrow-left"></i> Quay lại ví tiền</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

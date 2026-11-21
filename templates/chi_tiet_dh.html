@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Đơn hàng #{{ don.id }} — Sakura Boutique{% endblock %}
+
+{% block content %}
+<div class="order-detail">
+    <div class="page-header">
+        <h2><i class="fas fa-receipt"></i> Đơn hàng #{{ don.id }}</h2>
+        <a href="{{ url_for('don_hang') }}" class="btn"><i class="fas fa-arrow-left"></i> Quay lại</a>
+    </div>
+
+    <div class="order-info-grid">
+        <div class="info-card">
+            <h3><i class="fas fa-box"></i> Thông tin sản phẩm</h3>
+            <p><strong>Sản phẩm:</strong> <a href="{{ url_for('chi_tiet_san_pham', sp_id=don.san_pham.id) }}">{{ don.san_pham.ten }}</a></p>
+            <p><strong>Số lượng:</strong> {{ don.so_luong }}</p>
+            {% if don.kich_co_chon %}<p><strong>Kích cỡ:</strong> {{ don.kich_co_chon }}</p>{% endif %}
+            {% if don.mau_sac_chon %}<p><strong>Màu sắc:</strong> {{ don.mau_sac_chon }}</p>{% endif %}
+            <p class="total-price"><strong>Tổng tiền:</strong> {{ dinh_dang_tien(don.tong_tien) }} VNĐ</p>
+        </div>
+        <div class="info-card">
+            <h3><i class="fas fa-truck"></i> Thông tin giao hàng</h3>
+            <p><strong>Người mua:</strong> {{ don.nguoi_mua.ho_ten }}</p>
+            <p><strong>Địa chỉ:</strong> {{ don.dia_chi_giao or 'Chưa có' }}</p>
+            <p><strong>Trạng thái:</strong> <span class="badge badge-{{ 'success' if don.trang_thai == 'hoan_thanh' else 'warning' if don.trang_thai in ('cho_xu_ly','da_thanh_toan','dang_giao') else 'danger' }}">{{ TRANG_THAI_DON.get(don.trang_thai, don.trang_thai) }}</span></p>
+            <p><strong>Ngày đặt:</strong> {{ don.created_at.strftime('%d/%m/%Y %H:%M') }}</p>
+        </div>
+    </div>
+
+    <div class="order-actions">
+        {% if la_nguoi_ban and don.trang_thai == 'cho_xu_ly' %}
+            <a href="{{ url_for('cap_nhat_don_hang', dh_id=don.id, hanh_dong='xac-nhan') }}" class="btn btn-primary"><i class="fas fa-check"></i> Xác nhận đơn</a>
+        {% endif %}
+        {% if la_nguoi_ban and don.trang_thai == 'da_thanh_toan' %}
+            <a href="{{ url_for('cap_nhat_don_hang', dh_id=don.id, hanh_dong='giao-hang') }}" class="btn btn-primary"><i class="fas fa-truck"></i> Giao hàng</a>
+        {% endif %}
+        {% if la_nguoi_mua and don.trang_thai == 'dang_giao' %}
+            <a href="{{ url_for('cap_nhat_don_hang', dh_id=don.id, hanh_dong='nhan-hang') }}" class="btn btn-primary"><i class="fas fa-box-open"></i> Đã nhận hàng</a>
+        {% endif %}
+        {% if la_nguoi_mua and don.trang_thai in ('cho_xu_ly', 'da_thanh_toan') %}
+            <a href="{{ url_for('cap_nhat_don_hang', dh_id=don.id, hanh_dong='huy') }}" class="btn btn-danger" onclick="return confirm('Bạn có chắc muốn huỷ đơn hàng?')"><i class="fas fa-times"></i> Huỷ đơn</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

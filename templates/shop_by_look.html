@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Shop by Look — Sakura Boutique{% endblock %}
+
+{% block content %}
+<div class="shop-header">
+    <div class="shop-breadcrumb">HOME / <strong>SHOP BY LOOK</strong></div>
+    <div class="shop-right">
+        <span class="shop-count">{{ ds_anh|length }} looks</span>
+    </div>
+</div>
+
+{% if ds_anh %}
+<div class="lookbook-grid">
+    {% for anh in ds_anh %}
+    <div class="lookbook-item">
+        <img src="{{ url_for('static', filename='uploads/lookbook/' + anh) }}" alt="Look {{ loop.index }}" loading="lazy">
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p style="text-align:center; padding:60px 0; color:#888;">Chưa có ảnh lookbook. Chạy script <code>tai_full_magenta.py</code> để tải.</p>
+{% endif %}
+{% endblock %}

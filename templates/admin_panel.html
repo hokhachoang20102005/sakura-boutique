@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Quản trị — Sakura Boutique{% endblock %}
+
+{% block content %}
+<div class="admin-panel">
+    <h2 class="section-title">Quản trị</h2>
+    <div class="admin-grid">
+        <a href="{{ url_for('sp_cua_toi') }}" class="admin-card">
+            <i class="fas fa-tshirt"></i>
+            <h3>Sản phẩm</h3>
+            <p>Quản lý sản phẩm đang bán</p>
+        </a>
+        <a href="{{ url_for('dang_ban') }}" class="admin-card">
+            <i class="fas fa-plus-circle"></i>
+            <h3>Đăng bán</h3>
+            <p>Thêm sản phẩm mới</p>
+        </a>
+        <a href="{{ url_for('admin_duyet_nap') }}" class="admin-card">
+            <i class="fas fa-money-check-alt"></i>
+            <h3>Duyệt nạp tiền</h3>
+            <p>Xử lý yêu cầu nạp</p>
+        </a>
+        <a href="{{ url_for('admin_csdl') }}" class="admin-card">
+            <i class="fas fa-database"></i>
+            <h3>Cơ sở dữ liệu</h3>
+            <p>Xem bảng & quan hệ</p>
+        </a>
+    </div>
+</div>
+{% endblock %}

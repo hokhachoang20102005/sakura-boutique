@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block title %}Ví tiền — Sakura Boutique{% endblock %}
+
+{% block content %}
+<div class="wallet-page">
+    <div class="wallet-header">
+        <div class="wallet-icon"><i class="fas fa-wallet"></i></div>
+        <h2>Ví điện tử</h2>
+        <div class="wallet-balance">
+            <span class="balance-label">Số dư hiện tại</span>
+            <span class="balance-amount">{{ dinh_dang_tien(vi.so_du) }} <small>VNĐ</small></span>
+        </div>
+        <div class="wallet-actions">
+            <a href="{{ url_for('nap_tien') }}" class="btn btn-wallet"><i class="fas fa-plus-circle"></i> Nạp tiền</a>
+            <a href="{{ url_for('chuyen_tien') }}" class="btn btn-wallet"><i class="fas fa-paper-plane"></i> Chuyển tiền</a>
+        </div>
+    </div>
+
+    <h3><i class="fas fa-clock-rotate-left"></i> Yêu cầu nạp tiền</h3>
+    {% if ds_yeu_cau %}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Mã GD</th>
+                <th>Số tiền</th>
+                <th>Trạng thái</th>
+                <th>Thời gian</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for yc in ds_yeu_cau %}
+            <tr>
+                <td><strong>{{ yc.ma_giao_dich }}</strong></td>
+                <td>{{ dinh_dang_tien(yc.so_tien) }}đ</td>
+                <td>
+                    {% if yc.trang_thai == 'cho_duyet' %}
+                        <span class="badge badge-warning"><i class="fas fa-hourglass-half"></i> Chờ duyệt</span>
+                    {% elif yc.trang_thai == 'da_duyet' %}
+                        <span class="badge badge-success"><i class="fas fa-check"></i> Đã duyệt</span>
+                    {% else %}
+                        <span class="badge badge-danger"><i class="fas fa-times"></i> Từ chối</span>
+                    {% endif %}
+                </td>
+                <td>{{ yc.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p class="empty-text">Chưa có yêu cầu nạp tiền.</p>
+    {% endif %}
+
+    <h3><i class="fas fa-list"></i> Lịch sử giao dịch</h3>
+    {% if ds_giao_dich %}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Loại</th>
+                <th>Số tiền</th>
+                <th>Số dư sau</th>
+                <th>Mô tả</th>
+                <th>Thời gian</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for gd in ds_giao_dich %}
+            <tr>
+                <td>{{ LOAI_GIAO_DICH.get(gd.loai, gd.loai) }}</td>
+                <td class="{% if gd.so_tien > 0 %}text-green{% else %}text-red{% endif %}">
+                    {% if gd.so_tien > 0 %}+{% endif %}{{ dinh_dang_tien(gd.so_tien) }}đ
+                </td>
+                <td>{{ dinh_dang_tien(gd.so_du_sau) }}đ</td>
+                <td>{{ gd.mo_ta }}</td>
+                <td>{{ gd.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p class="empty-text">Chưa có giao dịch nào.</p>
+    {% endif %}
+</div>
+{% endblock %}

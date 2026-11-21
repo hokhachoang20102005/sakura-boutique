@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Sản phẩm của tôi — Sakura Boutique{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2><i class="fas fa-store"></i> Sản phẩm của tôi</h2>
+    <a href="{{ url_for('dang_ban') }}" class="btn btn-primary"><i class="fas fa-plus"></i> Đăng bán mới</a>
+</div>
+
+{% if ds_san_pham %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Ảnh</th>
+            <th>Tên</th>
+            <th>Danh mục</th>
+            <th>Giá</th>
+            <th>Tồn kho</th>
+            <th>Trạng thái</th>
+            <th>Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for sp in ds_san_pham %}
+        <tr>
+            <td>
+                {% if sp.anh %}
+                    <img src="{{ url_for('static', filename='uploads/' + sp.anh) }}" class="thumb">
+                {% else %}
+                    <span class="text-light">—</span>
+                {% endif %}
+            </td>
+            <td><a href="{{ url_for('chi_tiet_san_pham', sp_id=sp.id) }}">{{ sp.ten }}</a></td>
+            <td>{{ DANH_MUC.get(sp.danh_muc, sp.danh_muc) }}</td>
+            <td>{{ dinh_dang_tien(sp.gia) }}đ</td>
+            <td>{{ sp.so_luong }}</td>
+            <td>{% if sp.dang_ban %}<span class="badge badge-success">Đang bán</span>{% else %}<span class="badge badge-muted">Đã ẩn</span>{% endif %}</td>
+            <td class="action-cell">
+                <a href="{{ url_for('sua_san_pham', sp_id=sp.id) }}" class="btn btn-small"><i class="fas fa-edit"></i> Sửa</a>
+                {% if sp.dang_ban %}
+                    <a href="{{ url_for('xoa_san_pham', sp_id=sp.id) }}" class="btn btn-small btn-danger"><i class="fas fa-eye-slash"></i> Ẩn</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+    <div class="empty-msg">
+        <i class="fas fa-box-open"></i>
+        <p>Bạn chưa đăng sản phẩm nào.</p>
+        <a href="{{ url_for('dang_ban') }}" class="btn btn-primary">Đăng bán ngay</a>
+    </div>
+{% endif %}
+{% endblock %}

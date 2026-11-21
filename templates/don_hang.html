@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block title %}Đơn hàng — Sakura Boutique{% endblock %}
+
+{% block content %}
+<h2><i class="fas fa-shopping-bag"></i> Đơn hàng của tôi</h2>
+
+<div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('tab-mua', this)"><i class="fas fa-shopping-cart"></i> Đơn mua ({{ ds_mua|length }})</button>
+    <button class="tab-btn" onclick="switchTab('tab-ban', this)"><i class="fas fa-store"></i> Đơn bán ({{ ds_ban|length }})</button>
+</div>
+
+<div id="tab-mua" class="tab-content active">
+{% if ds_mua %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Sản phẩm</th>
+            <th>SL</th>
+            <th>Size / Màu</th>
+            <th>Tổng tiền</th>
+            <th>Trạng thái</th>
+            <th>Ngày</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for don in ds_mua %}
+        <tr>
+            <td>{{ don.id }}</td>
+            <td>{{ don.san_pham.ten }}</td>
+            <td>{{ don.so_luong }}</td>
+            <td>{{ don.kich_co_chon or '—' }} / {{ don.mau_sac_chon or '—' }}</td>
+            <td>{{ dinh_dang_tien(don.tong_tien) }}đ</td>
+            <td><span class="badge badge-{{ 'success' if don.trang_thai == 'hoan_thanh' else 'warning' if don.trang_thai in ('cho_xu_ly','da_thanh_toan','dang_giao') else 'danger' }}">{{ TRANG_THAI_DON.get(don.trang_thai, don.trang_thai) }}</span></td>
+            <td>{{ don.created_at.strftime('%d/%m/%Y') }}</td>
+            <td><a href="{{ url_for('chi_tiet_don_hang', dh_id=don.id) }}" class="btn btn-small">Xem</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+    <div class="empty-msg compact">
+        <i class="fas fa-box-open"></i>
+        <p>Chưa có đơn mua nào.</p>
+    </div>
+{% endif %}
+</div>
+
+<div id="tab-ban" class="tab-content">
+{% if ds_ban %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Sản phẩm</th>
+            <th>Người mua</th>
+            <th>SL</th>
+            <th>Tổng tiền</th>
+            <th>Trạng thái</th>
+            <th>Ngày</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for don in ds_ban %}
+        <tr>
+            <td>{{ don.id }}</td>
+            <td>{{ don.san_pham.ten }}</td>
+            <td>{{ don.nguoi_mua.ho_ten }}</td>
+            <td>{{ don.so_luong }}</td>
+            <td>{{ dinh_dang_tien(don.tong_tien) }}đ</td>
+            <td><span class="badge badge-{{ 'success' if don.trang_thai == 'hoan_thanh' else 'warning' if don.trang_thai in ('cho_xu_ly','da_thanh_toan','dang_giao') else 'danger' }}">{{ TRANG_THAI_DON.get(don.trang_thai, don.trang_thai) }}</span></td>
+            <td>{{ don.created_at.strftime('%d/%m/%Y') }}</td>
+            <td><a href="{{ url_for('chi_tiet_don_hang', dh_id=don.id) }}" class="btn btn-small">Xem</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+    <div class="empty-msg compact">
+        <i class="fas fa-box-open"></i>
+        <p>Chưa có đơn bán nào.</p>
+    </div>
+{% endif %}
+</div>
+
+<script>
+function switchTab(id, btn) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+}
+</script>
+{% endblock %}

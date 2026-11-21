@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}Quản lý CSDL — Admin{% endblock %}
+
+{% block content %}
+<h2><i class="fas fa-database"></i> Quản lý Cơ sở dữ liệu</h2>
+
+<div class="csdl-layout">
+    <div class="csdl-sidebar">
+        <h3>Các bảng</h3>
+        <ul class="bang-list">
+            {% for key, info in ds_bang.items() %}
+                <li>
+                    <a href="{{ url_for('admin_csdl', bang=key) }}" class="{% if bang_chon == key %}active{% endif %}">
+                        <i class="fas fa-table"></i> {{ info.ten }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="csdl-main">
+        {% if bang_chon %}
+        <h3>Bảng: {{ ds_bang[bang_chon].ten }}</h3>
+        {% if du_lieu %}
+        <div class="table-scroll">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        {% for cot in ten_cot %}
+                            <th>{{ cot }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for dong in du_lieu %}
+                    <tr>
+                        {% for gia_tri in dong %}
+                            <td>{{ gia_tri }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <p class="hint">Tổng: {{ du_lieu|length }} dòng</p>
+        {% else %}
+            <p class="empty-text">Bảng trống.</p>
+        {% endif %}
+        {% else %}
+            <p class="empty-text">Chọn một bảng bên trái để xem dữ liệu.</p>
+        {% endif %}
+
+        <h3 style="margin-top: 40px"><i class="fas fa-project-diagram"></i> Sơ đồ quan hệ (ER)</h3>
+        <div class="er-diagram">
+            {% for qh in quan_he %}
+            <div class="er-relation">
+                <span class="er-table">{{ qh.tu_bang }}</span>
+                <span class="er-col">.{{ qh.tu_cot }}</span>
+                <span class="er-arrow"><i class="fas fa-long-arrow-alt-right"></i></span>
+                <span class="er-table">{{ qh.den_bang }}</span>
+                <span class="er-col">.{{ qh.den_cot }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

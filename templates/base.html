@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sakura Boutique{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('trang_chu') }}" class="logo">
+                <span class="logo-text"><small class="logo-since">since 2024</small>Sakura Boutique</span>
+            </a>
+            <button class="nav-toggle" onclick="this.parentElement.classList.toggle('open')">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="nav-links">
+                <a href="{{ url_for('trang_chu') }}">HOME</a>
+                <a href="{{ url_for('shop_by_look') }}">SHOP BY LOOK</a>
+                <a href="{{ url_for('trang_chu') }}">SHOP</a>
+            </div>
+            <div class="nav-right">
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('vi_tien') }}" class="nav-icon" title="Ví tiền"><i class="fas fa-wallet"></i></a>
+                    <a href="{{ url_for('don_hang') }}" class="nav-icon" title="Đơn hàng"><i class="fas fa-box"></i></a>
+                    {% if current_user.la_admin %}
+                        <a href="{{ url_for('admin_panel') }}" class="nav-icon nav-admin-icon" title="Quản trị"><i class="fas fa-cog"></i></a>
+                    {% endif %}
+                    <span class="nav-user-name">{{ current_user.ho_ten }}</span>
+                    <a href="{{ url_for('dang_xuat') }}" class="nav-action">ĐĂNG XUẤT</a>
+                {% else %}
+                    <a href="{{ url_for('dang_nhap') }}" class="nav-action">LOGIN</a>
+                    <a href="{{ url_for('dang_ky') }}" class="nav-action nav-signup">ĐĂNG KÝ</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <i class="fas fa-{% if category == 'success' %}check-circle{% elif category == 'danger' %}exclamation-circle{% elif category == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer class="footer">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <span class="footer-logo">Sakura Boutique</span>
+                <p>Thời trang nữ — Thanh lịch, nhẹ nhàng, tự tin</p>
+            </div>
+            <div class="footer-links">
+                <a href="{{ url_for('trang_chu') }}">Home</a>
+                <a href="{{ url_for('trang_chu') }}?danh_muc=ao">Áo</a>
+                <a href="{{ url_for('trang_chu') }}?danh_muc=dam">Đầm</a>
+                <a href="{{ url_for('trang_chu') }}?danh_muc=vay">Váy</a>
+                <a href="{{ url_for('trang_chu') }}?danh_muc=phu_kien">Phụ kiện</a>
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('vi_tien') }}">Ví tiền</a>
+                <a href="{{ url_for('don_hang') }}">Đơn hàng</a>
+                {% endif %}
+            </div>
+            <p class="footer-copy">&copy; 2024 Sakura Boutique.</p>
+        </div>
+    </footer>
+</body>
+</html>

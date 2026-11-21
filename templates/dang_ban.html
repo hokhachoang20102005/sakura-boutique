@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}{% if la_sua is defined and la_sua %}Sửa sản phẩm{% else %}Đăng bán{% endif %} — Sakura Boutique{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <h2><i class="fas fa-{% if la_sua is defined and la_sua %}edit{% else %}plus-circle{% endif %}"></i> {% if la_sua is defined and la_sua %}Sửa sản phẩm{% else %}Đăng bán sản phẩm{% endif %}</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+            <label>Tên sản phẩm</label>
+            <input type="text" name="ten" required value="{{ sp.ten if sp is defined else '' }}" placeholder="VD: Đầm hoa nhí tay phồng">
+        </div>
+        <div class="form-group">
+            <label>Danh mục</label>
+            <select name="danh_muc" required>
+                {% for key, val in DANH_MUC.items() %}
+                    <option value="{{ key }}" {% if sp is defined and sp.danh_muc == key %}selected{% endif %}>{{ val }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Giá bán (VNĐ)</label>
+                <input type="number" name="gia" required value="{{ sp.gia if sp is defined else '' }}" placeholder="VD: 350000">
+            </div>
+            <div class="form-group">
+                <label>Giá gốc (nếu giảm giá)</label>
+                <input type="number" name="gia_goc" value="{{ sp.gia_goc if sp is defined and sp.gia_goc else '' }}" placeholder="Tuỳ chọn">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Kích cỡ (VD: S,M,L,XL)</label>
+                <input type="text" name="kich_co" value="{{ sp.kich_co if sp is defined else '' }}" placeholder="S,M,L,XL">
+            </div>
+            <div class="form-group">
+                <label>Màu sắc (VD: Hồng,Đen,Trắng)</label>
+                <input type="text" name="mau_sac" value="{{ sp.mau_sac if sp is defined else '' }}" placeholder="Hồng,Đen,Trắng">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Chất liệu</label>
+                <input type="text" name="chat_lieu" value="{{ sp.chat_lieu if sp is defined else '' }}" placeholder="Lụa, Cotton, Ren...">
+            </div>
+            <div class="form-group">
+                <label>Số lượng tồn kho</label>
+                <input type="number" name="so_luong" value="{{ sp.so_luong if sp is defined else 1 }}" min="0">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Mô tả</label>
+            <textarea name="mo_ta" rows="4" placeholder="Mô tả chi tiết sản phẩm...">{{ sp.mo_ta if sp is defined else '' }}</textarea>
+        </div>
+        <div class="form-group">
+            <label><i class="fas fa-camera"></i> Ảnh sản phẩm</label>
+            <input type="file" name="anh" accept="image/*">
+            {% if sp is defined and sp.anh %}
+                <p class="hint">Ảnh hiện tại: {{ sp.anh }}</p>
+            {% endif %}
+        </div>
+        {% if la_sua is defined and la_sua %}
+        <div class="form-group checkbox-group">
+            <label>
+                <input type="checkbox" name="dang_ban" {% if sp.dang_ban %}checked{% endif %}> Đang bán
+            </label>
+        </div>
+        {% endif %}
+        <button type="submit" class="btn btn-primary btn-block">{% if la_sua is defined and la_sua %}<i class="fas fa-save"></i> Cập nhật{% else %}<i class="fas fa-plus"></i> Đăng bán{% endif %}</button>
+    </form>
+</div>
+{% endblock %}

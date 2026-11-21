@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block title %}{{ sp.ten }} — Sakura Boutique{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="{{ url_for('trang_chu') }}">Trang chủ</a>
+    <i class="fas fa-chevron-right"></i>
+    <span>{{ DANH_MUC.get(sp.danh_muc, sp.danh_muc) }}</span>
+    <i class="fas fa-chevron-right"></i>
+    <span>{{ sp.ten }}</span>
+</div>
+
+<div class="product-detail">
+    <div class="detail-image">
+        {% if sp.anh %}
+            <img src="{{ url_for('static', filename='uploads/' + sp.anh) }}" alt="{{ sp.ten }}">
+        {% else %}
+            <div class="no-image large"><i class="fas fa-image"></i><span>Chưa có ảnh</span></div>
+        {% endif %}
+    </div>
+    <div class="detail-info">
+        <span class="category-tag">{{ DANH_MUC.get(sp.danh_muc, sp.danh_muc) }}</span>
+        <h1>{{ sp.ten }}</h1>
+        <div class="price-row">
+            <span class="price large">{{ dinh_dang_tien(sp.gia) }}đ</span>
+            {% if sp.gia_goc %}
+                <span class="price-old large">{{ dinh_dang_tien(sp.gia_goc) }}đ</span>
+                <span class="discount">-{{ ((1 - sp.gia / sp.gia_goc) * 100) | int }}%</span>
+            {% endif %}
+        </div>
+
+        <div class="detail-meta">
+            {% if sp.chat_lieu %}
+                <div class="meta-item"><i class="fas fa-leaf"></i> <strong>Chất liệu:</strong> {{ sp.chat_lieu }}</div>
+            {% endif %}
+            <div class="meta-item"><i class="fas fa-boxes-stacked"></i> <strong>Tồn kho:</strong> {{ sp.so_luong }}</div>
+            <div class="meta-item"><i class="fas fa-store"></i> <strong>Người bán:</strong> {{ sp.nguoi_ban.ho_ten }}</div>
+        </div>
+
+        {% if sp.mo_ta %}
+            <div class="description">
+                <h3><i class="fas fa-align-left"></i> Mô tả sản phẩm</h3>
+                <p>{{ sp.mo_ta }}</p>
+            </div>
+        {% endif %}
+
+        {% if current_user.is_authenticated and sp.nguoi_ban_id != current_user.id and sp.so_luong > 0 %}
+        <form method="POST" action="{{ url_for('mua_hang', sp_id=sp.id) }}" class="buy-form">
+            {% if ds_kich_co %}
+            <div class="form-group">
+                <label>Kích cỡ</label>
+                <div class="option-group">
+                    {% for kc in ds_kich_co %}
+                        <label class="option-label">
+                            <input type="radio" name="kich_co" value="{{ kc }}" {% if loop.first %}checked{% endif %}>
+                            <span>{{ kc }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if ds_mau_sac %}
+            <div class="form-group">
+                <label>Màu sắc</label>
+                <div class="option-group">
+                    {% for ms in ds_mau_sac %}
+                        <label class="option-label">
+                            <input type="radio" name="mau_sac" value="{{ ms }}" {% if loop.first %}checked{% endif %}>
+                            <span>{{ ms }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label>Số lượng</label>
+                <input type="number" name="so_luong" value="1" min="1" max="{{ sp.so_luong }}" class="input-qty">
+            </div>
+
+            <div class="form-group">
+                <label>Địa chỉ giao hàng</label>
+                <textarea name="dia_chi" rows="2" required placeholder="Nhập địa chỉ nhận hàng..."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-large"><i class="fas fa-shopping-cart"></i> Mua ngay</button>
+        </form>
+        {% elif not current_user.is_authenticated %}
+            <div class="login-prompt">
+                <a href="{{ url_for('dang_nhap') }}" class="btn btn-primary btn-large"><i class="fas fa-sign-in-alt"></i> Đăng nhập để mua</a>
+            </div>
+        {% elif sp.so_luong == 0 %}
+            <p class="out-of-stock"><i class="fas fa-times-circle"></i> Hết hàng</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

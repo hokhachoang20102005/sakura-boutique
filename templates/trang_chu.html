@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}Sakura Boutique — Thời trang nữ thanh lịch{% endblock %}
+
+{% block content %}
+<div class="shop-header" id="san-pham">
+    <div class="shop-breadcrumb">
+        <a href="{{ url_for('trang_chu') }}">HOME</a> / <strong>SHOP</strong>
+    </div>
+    <div class="shop-right">
+        <span class="shop-count">Hiển thị {{ ds_san_pham|length }} sản phẩm</span>
+        <select class="sort-select" onchange="window.location.href=this.value">
+            <option value="{{ url_for('trang_chu') }}">Mặc định</option>
+            <option value="{{ url_for('trang_chu', sap_xep='gia_tang') }}" {% if request.args.get('sap_xep')=='gia_tang' %}selected{% endif %}>Giá: Thấp → Cao</option>
+            <option value="{{ url_for('trang_chu', sap_xep='gia_giam') }}" {% if request.args.get('sap_xep')=='gia_giam' %}selected{% endif %}>Giá: Cao → Thấp</option>
+            <option value="{{ url_for('trang_chu', sap_xep='moi_nhat') }}" {% if request.args.get('sap_xep')=='moi_nhat' %}selected{% endif %}>Mới nhất</option>
+        </select>
+    </div>
+</div>
+
+<div class="filter-bar">
+    <form method="GET" action="{{ url_for('trang_chu') }}" class="filter-form">
+        <div class="filter-group">
+            <select name="danh_muc">
+                <option value="">Tất cả danh mục</option>
+                {% for key, val in DANH_MUC.items() %}
+                    <option value="{{ key }}" {% if danh_muc_loc == key %}selected{% endif %}>{{ val }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-group">
+            <input type="text" name="q" placeholder="Tìm kiếm sản phẩm..." value="{{ request.args.get('q', '') }}">
+        </div>
+        <div class="filter-group filter-price">
+            <input type="number" name="gia_min" placeholder="Giá từ" value="{{ request.args.get('gia_min', '') }}">
+            <span class="filter-sep">—</span>
+            <input type="number" name="gia_max" placeholder="Giá đến" value="{{ request.args.get('gia_max', '') }}">
+        </div>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Lọc</button>
+    </form>
+</div>
+
+<div class="product-grid">
+    {% for sp in ds_san_pham %}
+    <div class="product-card">
+        <a href="{{ url_for('chi_tiet_san_pham', sp_id=sp.id) }}">
+            <div class="card-image">
+                {% if sp.anh %}
+                    <img src="{{ url_for('static', filename='uploads/' + sp.anh) }}" alt="{{ sp.ten }}" loading="lazy">
+                {% else %}
+                    <div class="no-image"><i class="fas fa-image"></i><span>Chưa có ảnh</span></div>
+                {% endif %}
+                <span class="category-tag">{{ DANH_MUC.get(sp.danh_muc, sp.danh_muc) }}</span>
+                {% if sp.gia_goc %}
+                    <span class="sale-badge">-{{ ((1 - sp.gia / sp.gia_goc) * 100) | int }}%</span>
+                {% endif %}
+                <div class="card-overlay"><span>Xem nhanh</span></div>
+            </div>
+            <div class="product-info">
+                <h3>{{ sp.ten }}</h3>
+                <div class="price-row">
+                    <span class="price">{{ dinh_dang_tien(sp.gia) }}đ</span>
+                    {% if sp.gia_goc %}
+                        <span class="price-old">{{ dinh_dang_tien(sp.gia_goc) }}đ</span>
+                    {% endif %}
+                </div>
+                {% if sp.chat_lieu %}
+                <p class="card-material"><i class="fas fa-leaf"></i> {{ sp.chat_lieu }}</p>
+                {% endif %}
+            </div>
+        </a>
+    </div>
+    {% endfor %}
+
+    {% if not ds_san_pham %}
+        <div class="empty-msg">
+            <i class="fas fa-box-open"></i>
+            <p>Chưa có sản phẩm nào.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
